@@ -4,6 +4,9 @@ const express = require('express');
 const app = express();
 const axios = require('axios').default;
 const parser = app.use(express.json());
+const env = require('dotenv');
+
+env.config();
 //const urlenc = express.urlencoded({extended:true})
 
 const page_token = process.env.PAGE_ACCESS_TOKEN;
