@@ -6,7 +6,10 @@ const app = express();
 const parser = app.use(express.json());
 //const urlenc = express.urlencoded({extended:true})
 
-
+app.get('/',(req, res) =>{
+    console.log("Hello");
+    res.send("Hello");
+})
 app.post('/webhook', (req, res)=>{
 
     let body = req.body;
