@@ -72,6 +72,10 @@ app.get('/webhook', (req, res) => {
             "id":PSID
         },
         "message":content
+    }).then(()=>{
+        console.log("Success");
+    }).catch((error)=>{
+        console.log(error);
     })
 
   }
