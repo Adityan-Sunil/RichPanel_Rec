@@ -8,6 +8,16 @@ const env = require('dotenv');
 
 env.config();
 //const urlenc = express.urlencoded({extended:true})
+const pg = require("pg");
+const db = new pg.Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {rejectUnauthorized: false}
+});
+
+db.connect((err)=>{
+    if(err)
+        console.log(err);
+});
 
 const page_token = process.env.PAGE_ACCESS_TOKEN;
 
@@ -15,6 +25,36 @@ app.get('/',(req, res) =>{
     console.log("Hello");
     res.send("Hello");
 })
+
+function sendToDB(event){
+    let eventSender = event.sender.id;
+    let timestamp = event.timestamp;
+    let page_end = event.recipient.id;
+    let content = event.message;
+
+    db.query("INSERT INTO EVENTS_TABLE (SENDER, PAGE, TIMESTAMP, CONTENT) VALUES ($1,$2,$3,$4)",[eventSender, page_end, timestamp, content], (err) =>{
+        if(err){
+            console.log(err);
+            return -1;
+        }
+    })
+    return 0;
+}
+
+function fetchFromDB(page_end){
+    db.query("SELECT * FROM EVENTS_TABLE WHERE PAGE = $1", [page_end], (err, res)=>{
+        if(err){
+            console.log(err);
+            return -1;
+        }
+        else{
+            return res.rows;
+        }
+    })
+}
+
+
+
 app.post('/webhook', (req, res)=>{
 
     let body = req.body;
@@ -25,6 +65,7 @@ app.post('/webhook', (req, res)=>{
             let PSID = event.sender.id;
             if(event.message){
                 console.log("message recieved");
+                sendToDB(event);
                 handleMessage(PSID, event.message);
             } else if(event.postback){
                 console.log("postback received");
