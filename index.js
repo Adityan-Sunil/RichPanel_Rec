@@ -2,9 +2,11 @@
 
 const express = require('express');
 const app = express();
-
+const axios = require('axios').default;
 const parser = app.use(express.json());
 //const urlenc = express.urlencoded({extended:true})
+
+const page_token = process.env.PAGE_ACCESS_TOKEN;
 
 app.get('/',(req, res) =>{
     console.log("Hello");
@@ -16,7 +18,15 @@ app.post('/webhook', (req, res)=>{
     if(body.object === 'page'){
         body.entry.forEach(entry => {
             let event = entry.messaging[0];
-            console.log(event);
+            console.log(event.sender.id);
+            let PSID = event.sender.id;
+            if(event.message){
+                console.log("message recieved");
+                handleMessage(PSID, event.message);
+            } else if(event.postback){
+                console.log("postback received");
+                handlePostback(PSID, event.postback);
+            }
         });
         res.status(200).send('Event Recieved');
     } else {
@@ -31,7 +41,7 @@ app.listen(process.env.PORT||3000, ()=>{
 app.get('/webhook', (req, res) => {
 
     // Your verify token. Should be a random string.
-    let VERIFY_TOKEN = "4Z2xwXpWSd7VttRpn6GvSfb26qt3KFXc"
+    let VERIFY_TOKEN = process.env.VERIFY_TOKEN;
       
     // Parse the query params
     let mode = req.query['hub.mode'];
@@ -54,3 +64,24 @@ app.get('/webhook', (req, res) => {
       }
     }
   });
+  function callSendAPI(PSID, content){
+
+    axios.post("https://graph.facebook.com/v11.0/me/messages?access_token="+page_token,{
+        "messaging_type": "RESPONSE",
+        "recipient":{
+            "id":PSID
+        },
+        "message":content
+    })
+
+  }
+  function handleMessage(PSID, event_message){
+        let response;
+
+        if(event_message.text){
+            response = {
+                "text":"Hello World"
+            }
+        }
+        callSendAPI(PSID, response);
+    }
