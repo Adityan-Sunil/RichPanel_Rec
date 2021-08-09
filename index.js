@@ -32,7 +32,7 @@ function sendToDB(event){
     let page_end = event.recipient.id;
     let content = event.message;
 
-    db.query("INSERT INTO EVENTS_TABLE (SENDER, PAGE, TIMESTAMP, CONTENT) VALUES ($1,$2,$3,$4)",[eventSender, page_end, timestamp, content], (err) =>{
+    db.query("INSERT INTO EVENTS_TABLE (SENDER, PAGE, TIME_STAMP, MSG) VALUES ($1,$2, to_timestamp($3) ,$4)",[eventSender, page_end, timestamp, content], (err) =>{
         if(err){
             console.log(err);
             return -1;
