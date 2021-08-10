@@ -5,9 +5,9 @@ const app = express();
 const axios = require('axios').default;
 const parser = app.use(express.json());
 const env = require('dotenv');
-//let cors = require('cors')
+let cors = require('cors')
 
-//app.use(cors());
+app.use(cors());
 env.config();
 //const urlenc = express.urlencoded({extended:true})
 const pg = require("pg");
