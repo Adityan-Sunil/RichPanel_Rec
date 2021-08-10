@@ -5,7 +5,9 @@ const app = express();
 const axios = require('axios').default;
 const parser = app.use(express.json());
 const env = require('dotenv');
+//let cors = require('cors')
 
+//app.use(cors());
 env.config();
 //const urlenc = express.urlencoded({extended:true})
 const pg = require("pg");
@@ -42,7 +44,8 @@ function sendToDB(event){
 }
 
 function fetchFromDB(page_end){
-    db.query("SELECT * FROM EVENTS_TABLE WHERE PAGE = $1", [page_end], (err, res)=>{
+    console.log(page_end)
+    db.query("SELECT * FROM EVENTS_TABLE", (err, res)=>{
         if(err){
             console.log(err);
             return -1;
@@ -78,10 +81,44 @@ app.post('/webhook', (req, res)=>{
     }
 })
 
-app.listen(process.env.PORT||3000, ()=>{
+app.listen(process.env.PORT||4000, ()=>{
     console.log("Server is listening");
 })
-
+app.post('/get_convo', (req, res)=>{
+    let pageID = req.body.pageId;
+    //console.log(pageID);
+    db.query("SELECT * FROM EVENTS_TABLE WHERE PAGE = $1",[pageID], (err, result)=>{
+        if(err){
+            console.log(err);
+            res.sendStatus(404);
+        }
+        else{
+            res.send(result.rows);
+        }
+    })
+})
+app.post('/get_convo_list', (req, res)=>{
+    let pageID = req.body.pageId;
+    //console.log(pageID);
+    db.query("SELECT DISTINCT(SENDER) as sender FROM EVENTS_TABLE WHERE PAGE = $1",[pageID], (err, result)=>{
+        if(err){
+            console.log(err);
+            res.sendStatus(404);
+        }
+        else{
+            res.send(result.rows);
+        }
+    })
+})
+app.post('/replysend', (req, res) =>{
+    let reply = req.body.reply;
+    let psid = req.body.psid;
+    let response = {
+        "text":reply
+    }
+    callSendAPI(psid, response)
+    res.send("sent");
+})
 app.get('/webhook', (req, res) => {
 
     // Your verify token. Should be a random string.
