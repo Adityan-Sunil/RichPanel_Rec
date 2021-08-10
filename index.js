@@ -113,6 +113,8 @@ app.post('/get_convo_list', (req, res)=>{
 app.post('/replysend', (req, res) =>{
     let reply = req.body.reply;
     let psid = req.body.psid;
+    console.log(reply);
+    console.log(psid);
     let response = {
         "text":reply
     }
